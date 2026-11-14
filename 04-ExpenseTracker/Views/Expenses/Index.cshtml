@@ -1,0 +1,73 @@
+@model ExpenseSummaryViewModel
+@{
+    ViewData["Title"] = "Gastos";
+    var monthValue = Model.Month.ToString("yyyy-MM");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Gastos - @Model.Month.ToString("MMMM yyyy", UiHelpers.Es)</h1>
+    <a asp-action="Create" class="btn btn-primary">+ Nuevo gasto</a>
+</div>
+
+<form method="get" asp-action="Index" class="mb-4 d-flex gap-2 align-items-center">
+    <label for="month" class="form-label mb-0">Mes:</label>
+    <input id="month" name="month" type="month" value="@monthValue" class="form-control w-auto" onchange="this.form.submit()" />
+</form>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">Gastos</div>
+            @if (!Model.Expenses.Any())
+            {
+                <div class="card-body text-muted">No hay gastos registrados este mes.</div>
+            }
+            else
+            {
+                <table class="table table-sm mb-0 align-middle">
+                    <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th class="text-end">Monto</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var e in Model.Expenses)
+                    {
+                        <tr>
+                            <td>@e.Date.ToString("yyyy-MM-dd")</td>
+                            <td>@e.Description</td>
+                            <td><span class="badge bg-secondary">@e.Category.GetDisplayName()</span></td>
+                            <td class="text-end">@e.Amount.ToString("C")</td>
+                            <td class="text-end">
+                                <form asp-action="Delete" asp-route-id="@e.Id" asp-route-month="@monthValue" method="post" class="mb-0">
+                                    <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header">Resumen mensual</div>
+            <div class="card-body">
+                <p class="fs-4 mb-3">Total: <strong>@Model.Total.ToString("C")</strong></p>
+                @foreach (var c in Model.ByCategory)
+                {
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small">
+                            <span>@c.Category.GetDisplayName()</span><span>@c.Total.ToString("C") (@c.Percent.ToString("0")%)</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar" role="progressbar" style="width: @(c.Percent.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                        </div>
+                    </div>
+                }
+                @if (!Model.ByCategory.Any())
+                {
+                    <p class="text-muted mb-0">Aún no hay nada que resumir.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

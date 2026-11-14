@@ -1,0 +1,44 @@
+@model CalendarViewModel
+@{
+    ViewData["Title"] = "Calendario";
+    var dayNames = new[] { "Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb" };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Index" asp-route-year="@Model.PreviousMonth.Year" asp-route-month="@Model.PreviousMonth.Month">&laquo;</a>
+        <h1 class="h4 mb-0" style="min-width: 180px; text-align: center;">@Model.MonthName</h1>
+        <a class="btn btn-outline-secondary" asp-action="Index" asp-route-year="@Model.NextMonth.Year" asp-route-month="@Model.NextMonth.Month">&raquo;</a>
+        <a class="btn btn-link" asp-action="Index">Hoy</a>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Nuevo evento</a>
+</div>
+
+<table class="table table-bordered bg-white" style="table-layout: fixed;">
+    <thead class="table-light">
+        <tr>@foreach (var n in dayNames) { <th class="text-center">@n</th> }</tr>
+    </thead>
+    <tbody>
+    @foreach (var week in Model.Weeks)
+    {
+        <tr>
+        @foreach (var day in week)
+        {
+            var isToday = day.Date == DateTime.Today;
+            <td style="height: 110px; vertical-align: top;" class="@(day.InCurrentMonth ? "" : "bg-light text-muted") @(isToday ? "border-primary border-2" : "")">
+                <div class="d-flex justify-content-between">
+                    <small class="@(isToday ? "fw-bold text-primary" : "")">@day.Date.Day</small>
+                    <a asp-action="Create" asp-route-date="@day.Date.ToString("yyyy-MM-dd")" class="text-decoration-none small">+</a>
+                </div>
+                @foreach (var ev in day.Events)
+                {
+                    <a asp-action="Edit" asp-route-id="@ev.Id" class="badge bg-primary text-wrap text-start text-decoration-none d-block mt-1">
+                        @(ev.StartTime.ToString("HH:mm") + " " + ev.Title + (ev.ReminderMinutesBefore.HasValue ? " 🔔" : ""))
+                    </a>
+                }
+            </td>
+        }
+        </tr>
+    }
+    </tbody>
+</table>

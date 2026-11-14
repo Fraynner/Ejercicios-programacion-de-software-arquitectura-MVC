@@ -1,0 +1,33 @@
+@model List<GameScore>
+@{
+    ViewData["Title"] = "Puntajes"; 
+    var current = (Difficulty)ViewBag.Difficulty;
+}
+
+<h1 class="h4 mb-3">Mejores puntajes - @current.GetDisplayName()</h1>
+
+<ul class="nav nav-pills mb-3">
+    @foreach (var level in Enum.GetValues<Difficulty>())
+    {
+        <li class="nav-item"><a class="nav-link @(level == current ? "active" : "")" asp-action="Scores" asp-route-difficulty="@level">@level.GetDisplayName()</a></li>
+    }
+</ul>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Aún no hay puntajes para este nivel.</p>
+}
+else
+{
+    <table class="table bg-white">
+        <thead><tr><th>#</th><th>Jugador</th><th>Movimientos</th><th>Tiempo</th><th>Puntos</th><th>Fecha</th></tr></thead>
+        <tbody>
+        @for (var i = 0; i < Model.Count; i++)
+        {
+            var s = Model[i];
+            <tr><td>@(i + 1)</td><td>@s.PlayerName</td><td>@s.Moves</td><td>@s.Seconds s</td><td><strong>@s.Points</strong></td><td>@s.PlayedAt.ToString("yyyy-MM-dd")</td></tr>
+        }
+        </tbody>
+    </table>
+}
+<a asp-action="Play" asp-route-difficulty="@current" class="btn btn-primary">Jugar @current.GetDisplayName()</a>

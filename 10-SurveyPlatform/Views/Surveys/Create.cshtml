@@ -1,0 +1,26 @@
+@model Survey
+@{
+    ViewData["Title"] = "Crear encuesta";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h1 class="h3 mb-3">Crear una encuesta</h1>
+        <form asp-action="Create" method="post" class="card card-body">
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Título</label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Descripción</label>
+                <textarea asp-for="Description" rows="3" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Crear y agregar preguntas</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

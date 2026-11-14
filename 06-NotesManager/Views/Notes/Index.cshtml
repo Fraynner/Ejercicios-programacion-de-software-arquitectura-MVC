@@ -1,0 +1,53 @@
+@model NotesIndexViewModel
+@{
+    ViewData["Title"] = "Notas";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Mis notas</h1>
+    <a asp-action="Create" class="btn btn-primary">+ Nueva nota</a>
+</div>
+
+<form method="get" asp-action="Index" class="row g-2 mb-4">
+    <div class="col-md-6">
+        <input name="search" value="@Model.Search" class="form-control" placeholder="Buscar notas..." />
+    </div>
+    <div class="col-md-4">
+        <select name="categoryId" class="form-select" onchange="this.form.submit()">
+            <option value="">Todas las categorías</option>
+            @foreach (var c in Model.Categories)
+            {
+                <option value="@c.Id" selected="@(Model.CategoryId == c.Id)">@c.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2"><button class="btn btn-outline-secondary w-100">Buscar</button></div>
+</form>
+
+@if (!Model.Notes.Any())
+{
+    <p class="text-muted">No se encontraron notas.</p>
+}
+<div class="row g-3">
+    @foreach (var n in Model.Notes)
+    {
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">@n.Title</h2>
+                    <span class="badge bg-info text-dark mb-2">@(n.Category?.Name ?? "Sin categoría")</span>
+                    <p class="card-text" style="white-space: pre-wrap;">@n.Content</p>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                    <small class="text-muted">@n.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                    <div class="d-flex gap-1">
+                        <a asp-action="Edit" asp-route-id="@n.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <form asp-action="Delete" asp-route-id="@n.Id" method="post" class="mb-0">
+                            <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

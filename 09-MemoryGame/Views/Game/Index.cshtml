@@ -1,0 +1,42 @@
+@model GameIndexViewModel
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="text-center mb-4">
+    <h1 class="display-6">Juego de memoria</h1>
+    <p class="text-muted">Voltea las cartas y encuentra todas las parejas. Menos movimientos y menos tiempo dan más puntos.</p>
+</div>
+
+<div class="row justify-content-center g-3 mb-5">
+    @foreach (var level in Enum.GetValues<Difficulty>())
+    {
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h2 class="h5">@level.GetDisplayName()</h2>
+                    <p class="text-muted">@level.PairCount() parejas</p>
+                    <a asp-action="Play" asp-route-difficulty="@level" class="btn btn-primary">Jugar</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<h2 class="h5">Mejores 10 puntajes</h2>
+@if (!Model.TopScores.Any())
+{
+    <p class="text-muted">Aún no hay puntajes. ¡Sé el primero!</p>
+}
+else
+{
+    <table class="table bg-white">
+        <thead><tr><th>Jugador</th><th>Nivel</th><th>Movimientos</th><th>Tiempo</th><th>Puntos</th></tr></thead>
+        <tbody>
+        @foreach (var s in Model.TopScores)
+        {
+            <tr><td>@s.PlayerName</td><td>@s.Difficulty.GetDisplayName()</td><td>@s.Moves</td><td>@s.Seconds s</td><td><strong>@s.Points</strong></td></tr>
+        }
+        </tbody>
+    </table>
+}

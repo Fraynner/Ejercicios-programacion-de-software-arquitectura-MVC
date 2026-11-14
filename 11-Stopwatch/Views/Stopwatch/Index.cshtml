@@ -1,0 +1,148 @@
+@{
+    ViewData["Title"] = "Cronómetro";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1 class="h3 mb-4">Cronómetro en línea</h1>
+
+        <div id="display" class="display-1 font-monospace mb-4">00:00.00</div>
+
+        <div class="d-flex justify-content-center gap-2 mb-4">
+            <button id="startPause" type="button" class="btn btn-success btn-lg">Iniciar</button>
+            <button id="lap" type="button" class="btn btn-outline-primary btn-lg" disabled>Vuelta</button>
+            <button id="reset" type="button" class="btn btn-outline-danger btn-lg">Reiniciar</button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h5 mb-0">Vueltas</h2>
+            <button id="clearHistory" type="button" class="btn btn-sm btn-link text-danger">Borrar historial</button>
+        </div>
+        <table class="table table-sm bg-white">
+            <thead><tr><th>#</th><th>Tiempo de vuelta</th><th>Total</th><th>Registrado</th></tr></thead>
+            <tbody id="lapRows"></tbody>
+        </table>
+        <p id="noLaps" class="text-muted">Aún no hay vueltas registradas.</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const display = document.getElementById('display');
+            const startPause = document.getElementById('startPause');
+            const lapButton = document.getElementById('lap');
+            const resetButton = document.getElementById('reset');
+            const lapRows = document.getElementById('lapRows');
+            const noLaps = document.getElementById('noLaps');
+
+            let running = false;
+            let startedAt = 0;      // performance.now() when the current run started
+            let elapsedBefore = 0;  // ms accumulated before the current run
+            let lastLapTotal = 0;
+            let lapCount = 0;
+            let interval = null;
+
+            function format(ms) {
+                const minutes = Math.floor(ms / 60000);
+                const seconds = Math.floor((ms % 60000) / 1000);
+                const centis = Math.floor((ms % 1000) / 10);
+                return String(minutes).padStart(2, '0') + ':' +
+                       String(seconds).padStart(2, '0') + '.' +
+                       String(centis).padStart(2, '0');
+            }
+
+            function elapsed() {
+                return running ? elapsedBefore + (performance.now() - startedAt) : elapsedBefore;
+            }
+
+            function render() { display.textContent = format(elapsed()); }
+
+            function addLapRow(lap, atTop) {
+                const tr = document.createElement('tr');
+                [lap.lapNumber, format(lap.lapMilliseconds), format(lap.totalMilliseconds), lap.recordedAt]
+                    .forEach(function (value) {
+                        const td = document.createElement('td');
+                        td.textContent = value;
+                        tr.appendChild(td);
+                    });
+                if (atTop) { lapRows.prepend(tr); } else { lapRows.appendChild(tr); }
+                noLaps.style.display = 'none';
+            }
+
+            startPause.addEventListener('click', function () {
+                if (running) {
+                    elapsedBefore = elapsed();
+                    running = false;
+                    clearInterval(interval);
+                    startPause.textContent = 'Continuar';
+                    startPause.className = 'btn btn-success btn-lg';
+                    lapButton.disabled = true;
+                } else {
+                    startedAt = performance.now();
+                    running = true;
+                    interval = setInterval(render, 10);
+                    startPause.textContent = 'Pausar';
+                    startPause.className = 'btn btn-warning btn-lg';
+                    lapButton.disabled = false;
+                }
+                render();
+            });
+
+            lapButton.addEventListener('click', async function () {
+                const total = Math.round(elapsed());
+                const lap = {
+                    lapNumber: ++lapCount,
+                    lapMilliseconds: total - lastLapTotal,
+                    totalMilliseconds: total
+                };
+                lastLapTotal = total;
+                lap.recordedAt = new Date().toLocaleString();
+                addLapRow(lap, true);
+
+                try {
+                    await fetch('/Stopwatch/SaveLap', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            lapNumber: lap.lapNumber,
+                            lapMilliseconds: lap.lapMilliseconds,
+                            totalMilliseconds: lap.totalMilliseconds
+                        })
+                    });
+                } catch (err) { /* the lap stays visible even if saving fails */ }
+            });
+
+            // Reset only stops and zeroes the timer; the saved lap history is kept.
+            resetButton.addEventListener('click', function () {
+                running = false;
+                clearInterval(interval);
+                elapsedBefore = 0;
+                lastLapTotal = 0;
+                lapCount = 0;
+                startPause.textContent = 'Iniciar';
+                startPause.className = 'btn btn-success btn-lg';
+                lapButton.disabled = true;
+                render();
+            });
+
+            document.getElementById('clearHistory').addEventListener('click', async function () {
+                if (!confirm('¿Eliminar todas las vueltas guardadas?')) return;
+                await fetch('/Stopwatch/ClearHistory', { method: 'POST' });
+                lapRows.innerHTML = '';
+                noLaps.style.display = '';
+            });
+
+            async function loadHistory() {
+                try {
+                    const response = await fetch('/Stopwatch/Laps');
+                    const laps = await response.json();
+                    laps.forEach(function (lap) { addLapRow(lap, false); });
+                } catch (err) { /* ignore */ }
+            }
+
+            render();
+            loadHistory();
+        })();
+    </script>
+}

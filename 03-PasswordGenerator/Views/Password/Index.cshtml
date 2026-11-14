@@ -1,0 +1,53 @@
+@model PasswordViewModel
+@{
+    ViewData["Title"] = "Generador";
+    var badge = Model.Strength switch
+    {
+        "Débil" => "bg-danger",
+        "Media" => "bg-warning text-dark",
+        "Fuerte" => "bg-success",
+        _ => "bg-primary"
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h1 class="h3 mb-3">Generador de contraseñas seguras</h1>
+
+        @if (Model.Password != null)
+        {
+            <div class="card card-body mb-4">
+                <label class="form-label">Tu nueva contraseña</label>
+                <div class="input-group">
+                    <input id="generated" type="text" class="form-control font-monospace" value="@Model.Password" readonly />
+                    <button type="button" class="btn btn-outline-secondary" onclick="copyPassword()">Copiar</button>
+                </div>
+                <div class="mt-2">Seguridad: <span class="badge @badge">@Model.Strength</span></div>
+            </div>
+        }
+
+        <form asp-action="Index" method="post" class="card card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Options.Length" class="form-label">Longitud: <span id="lengthLabel">@Model.Options.Length</span></label>
+                <input asp-for="Options.Length" type="range" min="4" max="64" class="form-range" oninput="document.getElementById('lengthLabel').textContent = this.value" />
+                <span asp-validation-for="Options.Length" class="text-danger"></span>
+            </div>
+            <div class="form-check"><input asp-for="Options.IncludeUppercase" class="form-check-input" /><label asp-for="Options.IncludeUppercase" class="form-check-label">Letras mayúsculas (A-Z)</label></div>
+            <div class="form-check"><input asp-for="Options.IncludeLowercase" class="form-check-input" /><label asp-for="Options.IncludeLowercase" class="form-check-label">Letras minúsculas (a-z)</label></div>
+            <div class="form-check"><input asp-for="Options.IncludeNumbers" class="form-check-input" /><label asp-for="Options.IncludeNumbers" class="form-check-label">Números (0-9)</label></div>
+            <div class="form-check mb-3"><input asp-for="Options.IncludeSymbols" class="form-check-input" /><label asp-for="Options.IncludeSymbols" class="form-check-label">Símbolos (!@@#$...)</label></div>
+            <span asp-validation-for="Options.IncludeUppercase" class="text-danger mb-2"></span>
+            <button type="submit" class="btn btn-primary">Generar contraseña</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function copyPassword() {
+            const input = document.getElementById('generated');
+            navigator.clipboard.writeText(input.value);
+        }
+    </script>
+}

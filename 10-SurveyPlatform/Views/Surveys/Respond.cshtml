@@ -1,0 +1,42 @@
+@model Survey
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="h3">@Model.Title</h1>
+        <p class="text-muted">@Model.Description</p>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        @if (!Model.Questions.Any())
+        {
+            <p class="text-muted">Esta encuesta aún no tiene preguntas.</p>
+        }
+        else
+        {
+            <form asp-action="Respond" asp-route-id="@Model.Id" method="post">
+                @foreach (var q in Model.Questions)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <p class="fw-bold">@q.Text</p>
+                            @foreach (var o in q.Options)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="answers[@q.Id]" id="o-@o.Id" value="@o.Id" required />
+                                    <label class="form-check-label" for="o-@o.Id">@o.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                <button class="btn btn-primary">Enviar respuestas</button>
+            </form>
+        }
+    </div>
+</div>

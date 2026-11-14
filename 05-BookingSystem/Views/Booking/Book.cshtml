@@ -1,0 +1,56 @@
+@model BookingFormViewModel
+@{
+    ViewData["Title"] = "Reservar";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h1 class="h3 mb-3">Reservar: @Model.ServiceName</h1>
+
+        <form method="get" asp-action="Book" class="card card-body mb-3">
+            <input type="hidden" name="serviceId" value="@Model.ServiceId" />
+            <label for="date" class="form-label">Fecha</label>
+            <input id="date" name="date" type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                   value="@Model.Date.ToString("yyyy-MM-dd")" onchange="this.form.submit()" />
+        </form>
+
+        <form asp-action="Book" method="post" class="card card-body">
+            <input type="hidden" name="ServiceId" value="@Model.ServiceId" />
+            <input type="hidden" name="Date" value="@Model.Date.ToString("yyyy-MM-dd")" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Horarios disponibles el @Model.Date.ToString("dddd d 'de' MMMM", UiHelpers.Es)</label>
+                @if (!Model.AvailableSlots.Any())
+                {
+                    <p class="text-danger mb-0">No hay disponibilidad este día. Elige otra fecha.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var slot in Model.AvailableSlots)
+                        {
+                            <div>
+                                <input type="radio" class="btn-check" name="TimeSlot" id="slot-@slot" value="@slot" checked="@(Model.TimeSlot == slot)" />
+                                <label class="btn btn-outline-primary" for="slot-@slot">@slot</label>
+                            </div>
+                        }
+                    </div>
+                }
+                <span asp-validation-for="TimeSlot" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CustomerName" class="form-label">Nombre completo</label>
+                <input asp-for="CustomerName" class="form-control" />
+                <span asp-validation-for="CustomerName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Correo electrónico</label>
+                <input asp-for="Email" type="email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary" disabled="@(!Model.AvailableSlots.Any())">Continuar</button>
+        </form>
+    </div>
+</div>

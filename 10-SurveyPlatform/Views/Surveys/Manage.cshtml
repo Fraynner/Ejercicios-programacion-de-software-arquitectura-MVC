@@ -1,0 +1,57 @@
+@model ManageSurveyViewModel
+@{
+    ViewData["Title"] = "Editar encuesta";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="h3">@Model.Survey.Title</h1>
+        <p class="text-muted">@Model.Survey.Description</p>
+
+        <h2 class="h5 mt-4">Preguntas</h2>
+        @if (!Model.Survey.Questions.Any())
+        {
+            <p class="text-muted">Aún no hay preguntas. Agrega la primera abajo.</p>
+        }
+        @foreach (var q in Model.Survey.Questions)
+        {
+            <div class="card mb-2">
+                <div class="card-body d-flex justify-content-between">
+                    <div>
+                        <strong>@q.Text</strong>
+                        <ul class="mb-0 small">
+                            @foreach (var o in q.Options)
+                            {
+                                <li>@o.Text</li>
+                            }
+                        </ul>
+                    </div>
+                    <form asp-action="DeleteQuestion" asp-route-id="@q.Id" method="post">
+                        <button class="btn btn-sm btn-outline-danger">Quitar</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <form asp-action="AddQuestion" method="post" class="card card-body mt-4">
+            <h2 class="h6">Agregar una pregunta</h2>
+            <input type="hidden" asp-for="NewQuestion.SurveyId" />
+            <div class="mb-3">
+                <label asp-for="NewQuestion.Text" class="form-label">Pregunta</label>
+                <input asp-for="NewQuestion.Text" class="form-control" />
+                <span asp-validation-for="NewQuestion.Text" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="NewQuestion.OptionsText" class="form-label">Opciones (una por línea)</label>
+                <textarea asp-for="NewQuestion.OptionsText" rows="4" class="form-control" placeholder="Sí&#10;No&#10;Tal vez"></textarea>
+                <span asp-validation-for="NewQuestion.OptionsText" class="text-danger"></span>
+            </div>
+            <button class="btn btn-primary align-self-start">Agregar pregunta</button>
+        </form>
+
+        <div class="mt-4 d-flex gap-2">
+            <a asp-action="Respond" asp-route-id="@Model.Survey.Id" class="btn btn-success">Abrir encuesta</a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </div>
+</div>

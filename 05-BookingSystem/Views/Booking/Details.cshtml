@@ -1,0 +1,40 @@
+@model Booking
+@{
+    ViewData["Title"] = "Reserva";
+    var badge = Model.Status switch
+    {
+        BookingStatus.Confirmed => "bg-success",
+        BookingStatus.Cancelled => "bg-danger",
+        _ => "bg-warning text-dark"
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Reserva #@Model.Id <span class="badge @badge">@Model.Status.GetDisplayName()</span></div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Servicio:</strong> @Model.ServiceItem?.Name</li>
+                <li class="list-group-item"><strong>Fecha:</strong> @Model.Date.ToString("dddd d 'de' MMMM 'de' yyyy", UiHelpers.Es)</li>
+                <li class="list-group-item"><strong>Hora:</strong> @Model.TimeSlot</li>
+                <li class="list-group-item"><strong>Nombre:</strong> @Model.CustomerName</li>
+                <li class="list-group-item"><strong>Correo:</strong> @Model.Email</li>
+            </ul>
+            <div class="card-body d-flex gap-2">
+                @if (Model.Status == BookingStatus.Pending)
+                {
+                    <form asp-action="Confirm" asp-route-id="@Model.Id" method="post">
+                        <button class="btn btn-success">Confirmar reserva</button>
+                    </form>
+                }
+                @if (Model.Status != BookingStatus.Cancelled)
+                {
+                    <form asp-action="Cancel" asp-route-id="@Model.Id" method="post">
+                        <button class="btn btn-outline-danger">Cancelar reserva</button>
+                    </form>
+                }
+                <a asp-action="MyBookings" class="btn btn-outline-secondary">Todas las reservas</a>
+            </div>
+        </div>
+    </div>
+</div>

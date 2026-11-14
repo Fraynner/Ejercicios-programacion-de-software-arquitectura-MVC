@@ -1,0 +1,11 @@
+@model Survey
+@{
+    ViewData["Title"] = "Gracias";
+}
+
+<div class="text-center">
+    <h1 class="h3">¡Gracias!</h1>
+    <p class="text-muted">Tus respuestas a "@Model.Title" fueron registradas.</p>
+    <a asp-action="Results" asp-route-id="@Model.Id" class="btn btn-success">Ver resultados</a>
+    <a asp-action="Index" class="btn btn-outline-secondary">Todas las encuestas</a>
+</div>

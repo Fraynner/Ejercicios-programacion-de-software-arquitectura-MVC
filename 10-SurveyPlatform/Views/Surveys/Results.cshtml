@@ -1,0 +1,38 @@
+@model SurveyResultsViewModel
+@{
+    ViewData["Title"] = "Resultados";
+    var palette = new[] { "bg-primary", "bg-success", "bg-warning", "bg-info", "bg-danger", "bg-secondary" };
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="h3">Resultados: @Model.Survey.Title</h1>
+        <p class="text-muted">Total de respuestas: <strong>@Model.TotalResponses</strong></p>
+
+        @foreach (var q in Model.Questions)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p class="fw-bold mb-3">@q.Text <span class="badge bg-light text-dark border">@q.TotalAnswers respuestas</span></p>
+                    @for (var i = 0; i < q.Options.Count; i++)
+                    {
+                        var o = q.Options[i];
+                        var width = o.Percent.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between small">
+                                <span>@o.Text</span>
+                                <span>@o.Count (@o.Percent.ToString("0.#")%)</span>
+                            </div>
+                            <div class="progress" style="height: 18px;">
+                                <div class="progress-bar @(palette[i % palette.Length])" role="progressbar" style="width: @(width)%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <a asp-action="Respond" asp-route-id="@Model.Survey.Id" class="btn btn-primary">Responder encuesta</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+    </div>
+</div>

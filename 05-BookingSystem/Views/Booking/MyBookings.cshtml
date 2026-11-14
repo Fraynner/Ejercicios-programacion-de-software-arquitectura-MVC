@@ -1,0 +1,30 @@
+@model List<Booking>
+@{
+    ViewData["Title"] = "Reservas";
+}
+
+<h1 class="h3 mb-3">Todas las reservas</h1>
+@if (!Model.Any())
+{
+    <p class="text-muted">Aún no hay reservas.</p>
+}
+else
+{
+    <table class="table table-striped align-middle bg-white">
+        <thead><tr><th>#</th><th>Servicio</th><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.Id</td>
+                <td>@b.ServiceItem?.Name</td>
+                <td>@b.Date.ToString("yyyy-MM-dd")</td>
+                <td>@b.TimeSlot</td>
+                <td>@b.CustomerName</td>
+                <td>@b.Status.GetDisplayName()</td>
+                <td><a asp-action="Details" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">Ver</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

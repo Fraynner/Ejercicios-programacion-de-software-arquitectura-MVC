@@ -1,0 +1,97 @@
+@model PlayViewModel
+@{
+    ViewData["Title"] = "Jugar";
+    var columns = Model.Difficulty.GridColumns();
+}
+
+<style>
+    .board { display: grid; gap: 10px; max-width: 520px; margin: 0 auto; grid-template-columns: repeat(@columns, 1fr); }
+    .memory-card { aspect-ratio: 1 / 1; font-size: 2.2rem; border: 0; border-radius: .6rem; background: #0d6efd; color: transparent; }
+    .memory-card.flipped, .memory-card.matched { background: #fff; color: #000; border: 2px solid #0d6efd; }
+    .memory-card.matched { background: #d1e7dd; border-color: #198754; }
+</style>
+
+<div class="text-center mb-3">
+    <h1 class="h4">Nivel @Model.Difficulty.GetDisplayName()</h1>
+    <span class="badge bg-secondary fs-6 me-2">Movimientos: <span id="moves">0</span></span>
+    <span class="badge bg-secondary fs-6">Tiempo: <span id="time">0</span> s</span>
+</div>
+
+<div class="board" id="board">
+    @foreach (var card in Model.Cards)
+    {
+        <button type="button" class="memory-card" data-symbol="@card.Symbol">@card.Symbol</button>
+    }
+</div>
+
+<div id="winBox" class="card card-body mx-auto mt-4 d-none" style="max-width: 420px;">
+    <h2 class="h5 text-success">¡Ganaste! 🎉</h2>
+    <p class="mb-2">Movimientos: <strong id="finalMoves"></strong> &middot; Tiempo: <strong id="finalTime"></strong> s</p>
+    <form asp-action="SaveScore" method="post">
+        <input type="hidden" name="Difficulty" value="@Model.Difficulty" />
+        <input type="hidden" name="Moves" id="movesField" />
+        <input type="hidden" name="Seconds" id="secondsField" />
+        <div class="input-group">
+            <input name="PlayerName" class="form-control" placeholder="Tu nombre" maxlength="30" required />
+            <button class="btn btn-success">Guardar puntaje</button>
+        </div>
+    </form>
+    <a asp-action="Play" asp-route-difficulty="@Model.Difficulty" class="btn btn-link mt-2">Jugar de nuevo</a>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const cards = Array.from(document.querySelectorAll('.memory-card'));
+            let first = null, second = null, lock = false;
+            let moves = 0, matched = 0, seconds = 0, timer = null;
+
+            function startTimer() {
+                if (timer) return;
+                timer = setInterval(function () {
+                    seconds++;
+                    document.getElementById('time').textContent = seconds;
+                }, 1000);
+            }
+
+            function flip(card) {
+                if (lock || card === first || card.classList.contains('matched')) return;
+                startTimer();
+                card.classList.add('flipped');
+
+                if (!first) { first = card; return; }
+
+                second = card;
+                moves++;
+                document.getElementById('moves').textContent = moves;
+                lock = true;
+
+                if (first.dataset.symbol === second.dataset.symbol) {
+                    first.classList.add('matched'); second.classList.add('matched');
+                    matched += 2;
+                    reset();
+                    if (matched === cards.length) win();
+                } else {
+                    setTimeout(function () {
+                        first.classList.remove('flipped'); second.classList.remove('flipped');
+                        reset();
+                    }, 800);
+                }
+            }
+
+            function reset() { first = null; second = null; lock = false; }
+
+            function win() {
+                clearInterval(timer);
+                const total = Math.max(seconds, 1);
+                document.getElementById('finalMoves').textContent = moves;
+                document.getElementById('finalTime').textContent = total;
+                document.getElementById('movesField').value = moves;
+                document.getElementById('secondsField').value = total;
+                document.getElementById('winBox').classList.remove('d-none');
+            }
+
+            cards.forEach(function (c) { c.addEventListener('click', function () { flip(c); }); });
+        })();
+    </script>
+}

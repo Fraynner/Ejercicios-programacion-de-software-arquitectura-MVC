@@ -1,0 +1,45 @@
+@model Recipe
+@{
+    ViewData["Title"] = Model.Title;
+    var shareUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/Recipes/Shared/{Model.ShareCode}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="h3">@Model.Title</h1>
+                <span class="badge bg-info text-dark">@Model.MealType.GetDisplayName()</span>
+                <span class="badge bg-light text-dark border">@Model.PrepMinutes min</span>
+
+                <h2 class="h5 mt-4">Ingredientes</h2>
+                <ul>
+                    @foreach (var i in Model.IngredientList)
+                    {
+                        <li>@i</li>
+                    }
+                </ul>
+
+                <h2 class="h5 mt-4">Instrucciones</h2>
+                <p style="white-space: pre-wrap;">@Model.Instructions</p>
+
+                <hr />
+                <label class="form-label">Comparte esta receta</label>
+                <div class="input-group mb-3">
+                    <input id="shareUrl" class="form-control" value="@shareUrl" readonly />
+                    <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('shareUrl').value)">Copiar enlace</button>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <form asp-action="ToggleSaved" asp-route-id="@Model.Id" asp-route-returnTo="details" method="post">
+                        <button class="btn @(Model.IsSaved ? "btn-warning" : "btn-outline-warning")">@(Model.IsSaved ? "★ Guardada" : "☆ Guardar receta")</button>
+                    </form>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Volver a las recetas</a>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Eliminar esta receta?');">
+                        <button class="btn btn-outline-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

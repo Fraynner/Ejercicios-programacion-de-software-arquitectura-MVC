@@ -1,0 +1,42 @@
+@model Recipe
+@{
+    ViewData["Title"] = "Nueva receta";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="h3 mb-3">Compartir una receta</h1>
+        <form asp-action="Create" method="post" class="card card-body">
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Título</label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="MealType" class="form-label">Tipo de comida</label>
+                    <select asp-for="MealType" asp-items="Html.GetEnumSelectList<MealType>()" class="form-select"></select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="PrepMinutes" class="form-label">Tiempo de preparación (minutos)</label>
+                    <input asp-for="PrepMinutes" type="number" class="form-control" />
+                    <span asp-validation-for="PrepMinutes" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Ingredients" class="form-label">Ingredientes (uno por línea)</label>
+                <textarea asp-for="Ingredients" rows="6" class="form-control"></textarea>
+                <span asp-validation-for="Ingredients" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Instructions" class="form-label">Instrucciones</label>
+                <textarea asp-for="Instructions" rows="6" class="form-control"></textarea>
+                <span asp-validation-for="Instructions" class="text-danger"></span>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Publicar receta</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

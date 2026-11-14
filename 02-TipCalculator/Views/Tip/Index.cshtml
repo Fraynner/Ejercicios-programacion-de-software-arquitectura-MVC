@@ -1,0 +1,48 @@
+@model TipViewModel
+@{
+    ViewData["Title"] = "Calculadora";
+    var percentages = new SelectList(new[] { 0m, 5m, 10m, 15m, 18m, 20m, 25m });
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h1 class="h3 mb-3">Calculadora de propinas</h1>
+
+        <form asp-action="Index" method="post" class="card card-body mb-4">
+            <div class="mb-3">
+                <label asp-for="Input.BillAmount" class="form-label">Monto de la cuenta</label>
+                <input asp-for="Input.BillAmount" type="number" step="0.01" class="form-control" />
+                <span asp-validation-for="Input.BillAmount" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.TipPercentage" class="form-label">Porcentaje de propina</label>
+                <select asp-for="Input.TipPercentage" asp-items="percentages" class="form-select"></select>
+                <span asp-validation-for="Input.TipPercentage" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.People" class="form-label">Número de personas</label>
+                <input asp-for="Input.People" type="number" min="1" class="form-control" />
+                <span asp-validation-for="Input.People" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Calcular</button>
+        </form>
+
+        @if (Model.Result != null)
+        {
+            var r = Model.Result;
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">Resultado</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between"><span>Cuenta</span><strong>@r.Bill.ToString("C")</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Propina (@r.TipPercentage%)</span><strong>@r.TipAmount.ToString("C")</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Total</span><strong>@r.Total.ToString("C")</strong></li>
+                    @if (r.People > 1)
+                    {
+                        <li class="list-group-item d-flex justify-content-between"><span>Propina por persona</span><strong>@r.TipPerPerson.ToString("C")</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Total por persona (@r.People)</span><strong>@r.TotalPerPerson.ToString("C")</strong></li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
